@@ -5,11 +5,25 @@
     ], function(gettext, $, _, Backbone, messageBannerTemplate) {
         var MessageBannerView = Backbone.View.extend({
 
+            events: {
+                'click #close': 'closeBanner'
+            },
+
+            closeBanner: function(event) {
+                sessionStorage.setItem("isBannerClosed", true);
+                this.hideMessage();
+            },
+
             initialize: function(options) {
                 if (_.isUndefined(options)) {
                     options = {};
                 }
-                this.options = _.defaults(options, {urgency: 'high', type: ''});
+                this.options = _.defaults(options, {
+                    urgency: 'high',
+                    type: '',
+                    hideCloseBtn: true,
+                    isRecoveryEmailMsg: false
+                });
             },
 
             render: function() {
@@ -25,7 +39,9 @@
 
             showMessage: function(message) {
                 this.message = message;
-                this.render();
+                if(sessionStorage.getItem("isBannerClosed") == null) {
+                    this.render();
+                }
             },
 
             hideMessage: function() {

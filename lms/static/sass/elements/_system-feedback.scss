@@ -111,10 +111,24 @@
     }
   }
 
+  &.recovery-email-alert {
+    background: $state-info-bg !important;
+    box-shadow: none !important;
+    border-top: 1px solid #579cc5 !important;
+    padding: 20px 20px 20px 40px;
+    margin-top: -16px;
+  }
+
   &.urgency-low {
     background: $notify-banner-bg-3;
     box-shadow: 0 1px 2px $shadow;
-
+    .fa-close {
+      position:relative;
+      float:right;
+    }
+    .fa-close:hover {
+      cursor: pointer;
+    }
     .msg {
       color: $black;
     }
