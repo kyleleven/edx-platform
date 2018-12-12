@@ -22,7 +22,8 @@ from openedx.core.djangoapps.theming.helpers import is_request_in_themed_site
 from openedx.core.djangoapps.user_api.api import (
     RegistrationFormFactory,
     get_login_session_form,
-    get_password_reset_form
+    get_password_reset_form,
+    get_password_reset_via_secondary_email_form
 )
 from openedx.features.enterprise_support.api import enterprise_customer_for_request
 from openedx.features.enterprise_support.utils import (
@@ -124,6 +125,8 @@ def login_and_registration_form(request, initial_mode="login"):
             'login_form_desc': json.loads(form_descriptions['login']),
             'registration_form_desc': json.loads(form_descriptions['registration']),
             'password_reset_form_desc': json.loads(form_descriptions['password_reset']),
+            'password_reset_via_secondary_email_form_desc':
+                json.loads(form_descriptions['password_reset_via_secondary_email']),
             'account_creation_allowed': configuration_helpers.get_value(
                 'ALLOW_PUBLIC_ACCOUNT_CREATION', settings.FEATURES.get('ALLOW_PUBLIC_ACCOUNT_CREATION', True))
         },
@@ -161,6 +164,7 @@ def _get_form_descriptions(request):
 
     return {
         'password_reset': get_password_reset_form().to_json(),
+        'password_reset_via_secondary_email': get_password_reset_via_secondary_email_form().to_json(),
         'login': get_login_session_form(request).to_json(),
         'registration': RegistrationFormFactory().get_registration_form(request).to_json()
     }

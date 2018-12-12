@@ -134,6 +134,12 @@
                 this.trigger('password-help');
             },
 
+            secondaryForgotPassword: function(event) {
+                event.preventDefault();
+
+                this.trigger('secondary-password-help');
+            },
+
             getFormData: function() {
                 var obj = {},
                     $form = this.$form,

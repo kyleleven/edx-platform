@@ -473,6 +473,40 @@ def request_password_change(email, is_secure):
         # No user with the provided email address exists.
         raise errors.UserNotFound
 
+@helpers.intercept_errors(errors.UserAPIInternalError, ignore_errors=[errors.UserAPIRequestError])
+def request_password_change_via_secondary_email(email, is_secure):
+    """
+    Email a single-use link for performing a password reset.
+
+    Users must confirm the password change before we update their information.
+
+    Args:
+        email (str): An email address
+        is_secure (bool): Whether the request was made with HTTPS
+
+    Raises:
+        errors.UserNotFound: Raised if secondary email address does not exist.
+        AccountRequestError
+        errors.UserAPIInternalError: the operation failed due to an unexpected error.
+
+    """
+    # Binding data to a form requires that the data be passed as a dictionary
+    # to the Form class constructor.
+    form = student_forms.PasswordResetFormForSecondaryEmailNoActive({'email': email})
+
+    # Validate that a user exists with the given email address.
+    if form.is_valid():
+        # Generate a single-use link for performing a password reset
+        # and email it to the user.
+        form.save(
+            from_email=configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL),
+            use_https=is_secure,
+            request=get_current_request(),
+        )
+    else:
+        # No user with the provided email address exists.
+        raise errors.UserNotFound
+
 
 def get_name_validation_error(name):
     """Get the built-in validation error message for when

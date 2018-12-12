@@ -63,6 +63,7 @@
                         login: options.login_form_desc,
                         register: options.registration_form_desc,
                         reset: options.password_reset_form_desc,
+                        password_reset_via_secondary_email: options.password_reset_via_secondary_email_form_desc,
                         institution_login: null,
                         hinted_login: null
                     };
@@ -107,6 +108,9 @@
                     if (Backbone.history.getHash() === 'forgot-password-modal') {
                         this.resetPassword();
                     }
+                    else if (Backbone.history.getHash() === 'secondary-forgot-password-modal') {
+                        this.resetPasswordViaSecondaryEmail();
+                    }
                     this.loadForm(this.activeForm);
                 },
 
@@ -140,11 +144,30 @@
                     // Listen for 'password-help' event to toggle sub-views
                         this.listenTo(this.subview.login, 'password-help', this.resetPassword);
 
+                    // Listen for 'secondary-password-help' event to toggle sub-views
+                        this.listenTo(this.subview.login, 'secondary-password-help', this.resetPasswordViaSecondaryEmail);
+
                     // Listen for 'auth-complete' event so we can enroll/redirect the user appropriately.
                         this.listenTo(this.subview.login, 'auth-complete', this.authComplete);
                     },
 
                     reset: function(data) {
+                        this.resetModel.ajaxType = data.method;
+                        this.resetModel.urlRoot = data.submit_url;
+
+                        this.subview.passwordHelp = new PasswordResetView({
+                            fields: data.fields,
+                            model: this.resetModel
+                        });
+
+                    // Listen for 'password-email-sent' event to toggle sub-views
+                        this.listenTo(this.subview.passwordHelp, 'password-email-sent', this.passwordEmailSent);
+
+                    // Focus on the form
+                        $('.password-reset-form').focus();
+                    },
+
+                    password_reset_via_secondary_email: function(data) {
                         this.resetModel.ajaxType = data.method;
                         this.resetModel.urlRoot = data.submit_url;
 
@@ -213,6 +236,16 @@
 
                     this.element.hide($(this.el).find('#login-anchor'));
                     this.loadForm('reset');
+                    this.element.scrollTop($('#password-reset-anchor'));
+                },
+
+                resetPasswordViaSecondaryEmail: function() {
+                    window.analytics.track('edx.bi.password_reset_form.viewed', {
+                        category: 'user-engagement'
+                    });
+
+                    this.element.hide($(this.el).find('#login-anchor'));
+                    this.loadForm('password_reset_via_secondary_email');
                     this.element.scrollTop($('#password-reset-anchor'));
                 },
 

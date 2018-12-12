@@ -26,13 +26,18 @@ from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.core.djangoapps.user_api import accounts as accounts_settings
 from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from student.message_types import PasswordReset
-from student.models import CourseEnrollmentAllowed, email_exists_or_retired
+from student.models import AccountRecovery, CourseEnrollmentAllowed, email_exists_or_retired
 from util.password_policy_validators import validate_password
 
 
-def send_password_reset_email_for_user(user, request):
+def send_password_reset_email_for_user(user, request, preferred_email=None):
     """
     Send out a password reset email for the given user.
+
+    Arguments:
+        user (User): Django User object
+        request (HttpRequest): Django request object
+        preferred_email (str): Send email to this address if present, otherwise fallback to user's email address.
     """
     site = get_current_site()
     message_context = get_base_template_context(site)
@@ -51,7 +56,7 @@ def send_password_reset_email_for_user(user, request):
     })
 
     msg = PasswordReset().personalize(
-        recipient=Recipient(user.username, user.email),
+        recipient=Recipient(user.username, preferred_email or user.email),
         language=get_user_preference(user, LANGUAGE_KEY),
         user_context=message_context,
     )
@@ -93,6 +98,37 @@ class PasswordResetFormNoActive(PasswordResetForm):
         """
         for user in self.users_cache:
             send_password_reset_email_for_user(user, request)
+
+class PasswordResetFormForSecondaryEmailNoActive(PasswordResetFormNoActive):
+    error_messages = {
+        'unknown': _(
+            'That e-mail address doesn\'t have an associated user account. Are you sure you\'ve registered a '
+            'secondary email address? Please <a href={support_url}">contact support</a> for further assistance.'
+        ).format(
+            support_url=configuration_helpers.get_value('SUPPORT_SITE_LINK', settings.SUPPORT_SITE_LINK),
+        ),
+        'unusable': _('The user account associated with this e-mail '
+                      'address cannot reset the password.'),
+    }
+
+    def clean_email(self):
+        """
+        This is a literal copy from Django 1.4.5's django.contrib.auth.forms.PasswordResetForm
+        Except removing the requirement of active users
+        Validates that a user exists with the given email address.
+        """
+        email = self.cleaned_data["email"]
+        # The line below contains the only change, getting users via AccountRecovery
+        self.users_cache =  User.objects.filter(
+            id__in=AccountRecovery.objects.filter(secondary_email__iexact=email).values_list('user')
+        )
+
+        if not len(self.users_cache):
+            raise forms.ValidationError(self.error_messages['unknown'])
+        if any((user.password.startswith(UNUSABLE_PASSWORD_PREFIX))
+               for user in self.users_cache):
+            raise forms.ValidationError(self.error_messages['unusable'])
+        return email
 
 
 class TrueCheckbox(widgets.CheckboxInput):

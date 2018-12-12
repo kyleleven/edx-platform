@@ -76,6 +76,7 @@ from student.helpers import (
 )
 from student.message_types import EmailChange, PasswordReset
 from student.models import (
+    AccountRecovery,
     CourseEnrollment,
     PasswordHistory,
     PendingEmailChange,
@@ -717,6 +718,64 @@ def password_change_request_handler(request):
             log.exception('Error occured during password change for user {email}: {error}'
                           .format(email=email, error=err))
             return HttpResponse(_("Some error occured during password change. Please try again"), status=500)
+
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseBadRequest(_("No email address provided."))
+
+
+@require_http_methods(['POST'])
+def password_change_via_secondary_email_request_handler(request):
+    """
+    Handle password change requests originating from the account page.
+
+    Uses the Account API to email the user a link to the password reset page.
+
+    Note:
+        The next step in the password reset process (confirmation) is currently handled
+        by student.views.password_reset_confirm_wrapper, a custom wrapper around Django's
+        password reset confirmation view.
+
+    Args:
+        request (HttpRequest)
+
+    Returns:
+        HttpResponse: 200 if the email was sent successfully
+        HttpResponse: 400 if there is no 'email' POST parameter
+        HttpResponse: 403 if the client has been rate limited
+        HttpResponse: 405 if using an unsupported HTTP method
+
+    Example usage:
+
+        POST /account/password
+
+    """
+    limiter = BadRequestRateLimiter()
+    if limiter.is_rate_limit_exceeded(request):
+        AUDIT_LOG.warning("Password reset via secondary email rate limit exceeded")
+        return HttpResponseForbidden()
+
+    user = request.user
+    # Prefer logged-in user's email
+    email = request.POST.get('email')
+
+    if email:
+        try:
+            from openedx.core.djangoapps.user_api.accounts.api import request_password_change_via_secondary_email
+            request_password_change_via_secondary_email(email, request.is_secure())
+            user = user if user.is_authenticated else User.objects.get(
+                id=AccountRecovery.objects.get(secondary_email__iexact=email).user.id
+            )
+            destroy_oauth_tokens(user)
+        except UserNotFound:
+            return HttpResponseBadRequest(
+                _(
+                    'That e-mail address doesn\'t have an associated user account. Are you sure you\'ve registered a '
+                    'secondary email address? Please <a href={support_url}">contact support</a> for further assistance.'
+                ).format(
+                    support_url=configuration_helpers.get_value('SUPPORT_SITE_LINK', settings.SUPPORT_SITE_LINK),
+                )
+            )
 
         return HttpResponse(status=200)
     else:
