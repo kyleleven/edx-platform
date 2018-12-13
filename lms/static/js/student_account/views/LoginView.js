@@ -23,7 +23,7 @@
             events: {
                 'click .js-login': 'submitForm',
                 'click .forgot-password': 'forgotPassword',
-                'click .secondary-forgot-password': 'secondaryForgotPassword',
+                'click .account-recovery': 'accountRecovery',
                 'click .login-provider': 'thirdPartyAuth'
             },
             formType: 'login',
@@ -125,10 +125,10 @@
                 this.clearPasswordResetSuccess();
             },
 
-            secondaryForgotPassword: function(event) {
+            accountRecovery: function(event) {
                 event.preventDefault();
 
-                this.trigger('secondary-password-help');
+                this.trigger('account-recovery-help');
                 this.clearPasswordResetSuccess();
             },
 

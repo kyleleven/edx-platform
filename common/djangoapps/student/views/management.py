@@ -57,6 +57,7 @@ from openedx.core.djangoapps.programs.models import ProgramsApiConfig
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.theming import helpers as theming_helpers
 from openedx.core.djangoapps.theming.helpers import get_current_site
+from openedx.core.djangoapps.user_api.accounts.utils import is_secondary_email_feature_enabled
 from openedx.core.djangoapps.user_api.config.waffle import PREVENT_AUTH_USER_WRITES, SYSTEM_MAINTENANCE_MSG, waffle
 from openedx.core.djangoapps.user_api.errors import UserNotFound, UserAPIInternalError
 from openedx.core.djangoapps.user_api.models import UserRetirementRequest
@@ -750,6 +751,9 @@ def password_change_via_secondary_email_request_handler(request):
         POST /account/password
 
     """
+    if not is_secondary_email_feature_enabled():
+        raise Http404
+
     limiter = BadRequestRateLimiter()
     if limiter.is_rate_limit_exceeded(request):
         AUDIT_LOG.warning("Password reset via secondary email rate limit exceeded")
@@ -768,13 +772,8 @@ def password_change_via_secondary_email_request_handler(request):
             )
             destroy_oauth_tokens(user)
         except UserNotFound:
-            return HttpResponseBadRequest(
-                _(
-                    'That e-mail address doesn\'t have an associated user account. Are you sure you\'ve registered a '
-                    'secondary email address? Please <a href={support_url}">contact support</a> for further assistance.'
-                ).format(
-                    support_url=configuration_helpers.get_value('SUPPORT_SITE_LINK', settings.SUPPORT_SITE_LINK),
-                )
+            AUDIT_LOG.warning(
+                "Account recovery attempt via invalid secondary email '{email}'.".format(email=email)
             )
 
         return HttpResponse(status=200)

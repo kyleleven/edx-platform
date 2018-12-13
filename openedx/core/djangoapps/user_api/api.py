@@ -66,7 +66,7 @@ def get_password_reset_form():
     return form_desc
 
 
-def get_password_reset_via_secondary_email_form():
+def get_account_recovery_form():
     """
     Return a description of the password reset, using secondary email, form.
 

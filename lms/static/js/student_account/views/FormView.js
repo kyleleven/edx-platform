@@ -134,10 +134,10 @@
                 this.trigger('password-help');
             },
 
-            secondaryForgotPassword: function(event) {
+            accountRecovery: function(event) {
                 event.preventDefault();
 
-                this.trigger('secondary-password-help');
+                this.trigger('account-recovery-help');
             },
 
             getFormData: function() {

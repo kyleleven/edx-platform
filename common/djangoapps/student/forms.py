@@ -99,6 +99,7 @@ class PasswordResetFormNoActive(PasswordResetForm):
         for user in self.users_cache:
             send_password_reset_email_for_user(user, request)
 
+
 class PasswordResetFormForSecondaryEmailNoActive(PasswordResetFormNoActive):
     error_messages = {
         'unknown': _(
@@ -119,7 +120,7 @@ class PasswordResetFormForSecondaryEmailNoActive(PasswordResetFormNoActive):
         """
         email = self.cleaned_data["email"]
         # The line below contains the only change, getting users via AccountRecovery
-        self.users_cache =  User.objects.filter(
+        self.users_cache = User.objects.filter(
             id__in=AccountRecovery.objects.filter(secondary_email__iexact=email).values_list('user')
         )
 

@@ -8,7 +8,7 @@
             return FormView.extend({
                 el: '#password-reset-form',
 
-                tpl: '#password_reset_via_secondary_email-tpl',
+                tpl: '#account_recovery-tpl',
 
                 events: {
                     'click .js-reset': 'submitForm'
@@ -28,7 +28,7 @@
                 },
 
                 saveSuccess: function() {
-                    this.trigger('password-email-sent');
+                    this.trigger('account-recovery-email-sent');
 
                 // Destroy the view (but not el) and unbind events
                     this.$el.empty().off();

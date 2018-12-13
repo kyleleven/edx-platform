@@ -473,6 +473,7 @@ def request_password_change(email, is_secure):
         # No user with the provided email address exists.
         raise errors.UserNotFound
 
+
 @helpers.intercept_errors(errors.UserAPIInternalError, ignore_errors=[errors.UserAPIRequestError])
 def request_password_change_via_secondary_email(email, is_secure):
     """
