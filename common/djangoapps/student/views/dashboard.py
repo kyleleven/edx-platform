@@ -39,7 +39,7 @@ from openedx.core.djangoapps.programs.utils import ProgramDataExtender, ProgramP
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.util.maintenance_banner import add_maintenance_banner
 from openedx.core.djangoapps.waffle_utils import WaffleFlag, WaffleFlagNamespace
-from openedx.core.djangoapps.user_api.accounts.utils import is_secondary_email_feature_enabled
+from openedx.core.djangoapps.user_api.accounts.utils import is_secondary_email_feature_enabled_for_user
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.features.enterprise_support.api import get_dashboard_consent_notification
 from openedx.features.enterprise_support.utils import is_enterprise_learner
@@ -635,9 +635,8 @@ def student_dashboard(request):
     recovery_email_message = None
 
     # Update the tag info with 'enterprise_learner' if the user belongs to an enterprise customer.
-    is_enterprise_learner_data = is_enterprise_learner(user=request.user)
-    does_secondary_email_exist = AccountRecovery.objects.filter(user=user).values_list('secondary_email')
-    if is_enterprise_learner_data and is_secondary_email_feature_enabled() and not does_secondary_email_exist:
+    does_secondary_email_exist = AccountRecovery.objects.filter(user=user).exists()
+    if is_secondary_email_feature_enabled_for_user(user=user) and not does_secondary_email_exist:
         recovery_email_message = Text(_("Add a recovery email to retain access when single-sign on is not available. "
                                         "Go to {link_start}your Profile{link_end}.")).format(
             link_start=HTML("<a target='_blank' href='{account_setting_page}'>").format(
