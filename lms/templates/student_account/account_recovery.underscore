@@ -3,11 +3,11 @@
 
 <h2><%- gettext("Account Recovery") %></h2>
 
-<form id="password-reset-via-secondary-email" class="password-reset-form" tabindex="-1" method="POST">
+<form id="account-recovery" class="account-recovery-form password-reset-form" tabindex="-1" method="POST">
 
     <p class="action-label"><%- gettext("Please enter your secondary email address below and we will send you instructions for recovering your account and setting a new password.") %></p>
 
     <%= fields %>
 
-    <button type="submit" class="action action-primary action-update js-reset"><%- gettext("Recovery my account") %></button>
+    <button type="submit" class="action action-primary action-update js-reset"><%- gettext("Recover my account") %></button>
 </form>

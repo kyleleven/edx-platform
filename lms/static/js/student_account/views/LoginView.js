@@ -46,6 +46,7 @@
                 this.errorMessage = data.thirdPartyAuth.errorMessage || '';
                 this.platformName = data.platformName;
                 this.resetModel = data.resetModel;
+                this.accountRecoveryModel = data.accountRecoveryModel;
                 this.supportURL = data.supportURL;
                 this.passwordResetSupportUrl = data.passwordResetSupportUrl;
                 this.createAccountOption = data.createAccountOption;
@@ -56,6 +57,7 @@
 
                 this.listenTo(this.model, 'sync', this.saveSuccess);
                 this.listenTo(this.resetModel, 'sync', this.resetEmail);
+                this.listenTo(this.accountRecoveryModel, 'sync', this.resetEmail);
             },
 
             render: function(html) {

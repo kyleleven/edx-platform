@@ -140,6 +140,7 @@
                             fields: data.fields,
                             model: model,
                             resetModel: this.resetModel,
+                            accountRecoveryModel: this.accountRecoveryModel,
                             thirdPartyAuth: this.thirdPartyAuth,
                             accountActivationMessages: this.accountActivationMessages,
                             platformName: this.platformName,
@@ -178,8 +179,8 @@
                     },
 
                     account_recovery: function(data) {
-                        this.resetModel.ajaxType = data.method;
-                        this.resetModel.urlRoot = data.submit_url;
+                        this.accountRecoveryModel.ajaxType = data.method;
+                        this.accountRecoveryModel.urlRoot = data.submit_url;
 
                         this.subview.accountRecoveryHelp = new AccountRecoveryView({
                             fields: data.fields,

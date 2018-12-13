@@ -30,7 +30,7 @@
                 saveSuccess: function() {
                     this.trigger('account-recovery-email-sent');
 
-                // Destroy the view (but not el) and unbind events
+                    // Destroy the view (but not el) and unbind events
                     this.$el.empty().off();
                     this.stopListening();
                 }
