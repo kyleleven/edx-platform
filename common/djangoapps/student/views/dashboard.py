@@ -635,16 +635,18 @@ def student_dashboard(request):
     recovery_email_message = None
 
     # Update the tag info with 'enterprise_learner' if the user belongs to an enterprise customer.
-    does_secondary_email_exist = AccountRecovery.objects.filter(user=user).exists()
-    if is_secondary_email_feature_enabled_for_user(user=user) and not does_secondary_email_exist:
-        recovery_email_message = Text(_("Add a recovery email to retain access when single-sign on is not available. "
-                                        "Go to {link_start}your Profile{link_end}.")).format(
+    secondary_email_exist = AccountRecovery.objects.filter(user=user).exists()
+    if is_secondary_email_feature_enabled_for_user(user=user) and not secondary_email_exist:
+        recovery_email_message = Text(
+            _(
+                "Add a recovery email to retain access when single-sign on is not available. "
+                "Go to {link_start}your Profile{link_end}.")
+        ).format(
             link_start=HTML("<a target='_blank' href='{account_setting_page}'>").format(
                 account_setting_page=reverse('account_settings'),
             ),
             link_end=HTML("</a>")
         )
-
 
     # Disable lookup of Enterprise consent_required_course due to ENT-727
     # Will re-enable after fixing WL-1315
