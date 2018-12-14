@@ -16,11 +16,12 @@
         'js/student_account/views/InstitutionLoginView',
         'js/student_account/views/HintedLoginView',
         'js/student_account/views/AccountRecoveryView',
+        'edx-ui-toolkit/js/utils/html-utils',
         'js/vendor/history'
     ],
         function($, utility, _, _s, Backbone, LoginModel, PasswordResetModel, RegisterModel, AccountRecoveryModel,
-                 LoginView, PasswordResetView, RegisterView, InstitutionLoginView, HintedLoginView, AccountRecoveryView
-                 ) {
+                 LoginView, PasswordResetView, RegisterView, InstitutionLoginView, HintedLoginView, AccountRecoveryView,
+                 HtmlUtils) {
             return Backbone.View.extend({
                 tpl: '#access-tpl',
                 events: {
@@ -104,10 +105,14 @@
                 },
 
                 render: function() {
-                    $(this.el).html(_.template(this.tpl)({
-                        mode: this.activeForm
-                    }));
-
+                    HtmlUtils.setHtml(
+                        $(this.el),
+                        HtmlUtils.HTML(
+                            _.template(this.tpl)({
+                                mode: this.activeForm
+                            })
+                        )
+                    )
                     this.postRender();
 
                     return this;

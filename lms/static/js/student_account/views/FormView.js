@@ -55,10 +55,14 @@
             render: function(html) {
                 var fields = html || '';
 
-                $(this.el).html(_.template(this.tpl)({
-                    fields: fields
-                }));
-
+                HtmlUtils.setHtml(
+                    $(this.el),
+                    HtmlUtils.HTML(
+                        _.template(this.tpl)({
+                            fields: HtmlUtils.HTML(fields)
+                        })
+                    )
+                )
                 this.postRender();
 
                 return this;

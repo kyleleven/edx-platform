@@ -21,6 +21,7 @@ from edx_ace import ace
 from edx_ace.recipient import Recipient
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
 from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
+from openedx.core.djangolib.markup import HTML, Text
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.core.djangoapps.user_api import accounts as accounts_settings
@@ -103,13 +104,18 @@ class PasswordResetFormNoActive(PasswordResetForm):
 class PasswordResetFormForSecondaryEmailNoActive(PasswordResetFormNoActive):
     error_messages = {
         'unknown': _(
-            'That e-mail address doesn\'t have an associated user account. Are you sure you\'ve registered a '
-            'secondary email address? Please <a href={support_url}">contact support</a> for further assistance.'
+            HTML(
+                'That e-mail address doesn\'t have an associated user account. Are you sure you\'ve registered a '
+                'secondary email address? Please <a href={support_url}">contact support</a> for further assistance.'
+            )
         ).format(
             support_url=configuration_helpers.get_value('SUPPORT_SITE_LINK', settings.SUPPORT_SITE_LINK),
         ),
-        'unusable': _('The user account associated with this e-mail '
-                      'address cannot reset the password.'),
+        'unusable': _(
+            Text(
+                'The user account associated with this e-mail address cannot reset the password.'
+            )
+        ),
     }
 
     def clean_email(self):
