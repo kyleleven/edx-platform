@@ -613,11 +613,6 @@ class CourseTabView(EdxFragmentView):
         else:
             masquerade = None
 
-        if course and not check_course_open_for_learner(request.user, course):
-            # Disable student view button if user is staff and
-            # course is not yet visible to students.
-            supports_preview_menu = False
-
         context = {
             'course': course,
             'tab': tab,
